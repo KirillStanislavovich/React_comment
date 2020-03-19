@@ -1,25 +1,49 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React, { useState } from 'react';
+import Context from './context';
+import CommentList from './comment_list/CommentList';
+import AddComment from './AddComment/AddComment';
+import './index.css';
 
 function App() {
+  const [comments, setComments] = useState([]);
+
+  // if(localStorage.getItem('comment') !== null) {
+  //   setComments(comments.concat([
+  //     JSON.parse(localStorage.getItem('comments'))
+  //   ]))
+  // }
+
+  function addComment(name, text) {
+    setComments(
+      comments.concat([{
+        author: name,
+        text: text,
+        date: new Date().toLocaleString()
+      }])
+    );
+    saveLocal();
+  }
+
+  function removeComment(date) {
+    setComments(comments.filter(comment => comment.date !== date));
+  }
+
+  function saveLocal() {
+    localStorage.setItem('comments', JSON.stringify(comments))
+  }
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Context.Provider value={{removeComment: removeComment}}>
+      <div className='wrapper'>
+        <h1>Список комментариев</h1>
+        <AddComment onCreate={addComment}/>
+        {comments.length ? (
+          <CommentList comments={comments} local={saveLocal} />
+        ) : (
+          <p>Пока нет комментариев</p>
+        )}
+      </div>
+    </Context.Provider>
   );
 }
 
