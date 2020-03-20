@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Context from './context';
 import CommentList from './comment_list/CommentList';
 import AddComment from './AddComment/AddComment';
@@ -7,29 +7,26 @@ import './index.css';
 function App() {
   const [comments, setComments] = useState([]);
 
-  // if(localStorage.getItem('comment') !== null) {
-  //   setComments(comments.concat([
-  //     JSON.parse(localStorage.getItem('comments'))
-  //   ]))
-  // }
+  useEffect(() => {
+    if (localStorage.comments !== undefined) {
+      setComments(JSON.parse(localStorage.getItem('comments')));
+    }
+  }, [])
 
   function addComment(name, text) {
-    setComments(
-      comments.concat([{
-        author: name,
-        text: text,
-        date: new Date().toLocaleString()
-      }])
-    );
-    saveLocal();
+    setComments(comments.concat([{
+      author: name,
+      text: text,
+      date: new Date().toLocaleString()
+    }]))
   }
+
+  useEffect(() => {
+    localStorage.setItem('comments', JSON.stringify(comments))
+  }, [comments])
 
   function removeComment(date) {
     setComments(comments.filter(comment => comment.date !== date));
-  }
-
-  function saveLocal() {
-    localStorage.setItem('comments', JSON.stringify(comments))
   }
 
   return (
@@ -38,7 +35,7 @@ function App() {
         <h1>Список комментариев</h1>
         <AddComment onCreate={addComment}/>
         {comments.length ? (
-          <CommentList comments={comments} local={saveLocal} />
+          <CommentList comments={comments} />
         ) : (
           <p>Пока нет комментариев</p>
         )}
